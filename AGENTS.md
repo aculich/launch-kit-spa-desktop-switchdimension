@@ -6,6 +6,10 @@
 - **AGENTS.md** is **agent memory and preferences**: learned user preferences and workspace-specific facts (env, portless, 1Password, deploy). Use it for "how we want to run and configure things here."
 - **Recommendation:** Keep both. Nothing that belongs only in CLAUDE needs to live in AGENTS; CLAUDE stays the single source of truth for project/architecture. AGENTS stays the single source for preferences and workspace setup. If you merge them into one file, use AGENTS.md as the combined file and point Cursor at it; then CLAUDE.md can be removed or replaced with a one-line pointer to AGENTS.md.
 
+## Agent skills (credentials)
+
+When the conversation involves **API keys or credential access** (e.g. `API_KEY`, `OPENAI_API_KEY`, `CLERK_SECRET_KEY`, or any `*_API_KEY`), use the **op-credentials** skill: get keys via 1Password CLI (`op`) with `OP_ACCOUNT=my.1password.com` and the **develop** vault. If `op` fails (e.g. not signed in or fingerprint required), **do not work around**—report the error to the user and wait for them to complete auth or fix the item; do not suggest pasting secrets into `.env`.
+
 ## Learned User Preferences
 
 - Never delete files or large sections of code without explicitly asking permission and getting verification.
