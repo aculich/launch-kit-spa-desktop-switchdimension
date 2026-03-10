@@ -1,7 +1,12 @@
 import dotenv from 'dotenv';
-import { resolve } from 'path';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config({ path: resolve(import.meta.dirname, '../../../.env') });
+// Load .env from monorepo root (cwd can be repo root or apps/api depending on how npm/concurrently runs the script)
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
 
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
@@ -14,7 +19,16 @@ import { usersRoute } from './routes/users.js';
 const app = new Hono();
 
 app.use('/api/*', cors());
-app.use('/api/*', clerkMiddleware());
+
+const isClerkConfigured =
+  !!process.env.CLERK_SECRET_KEY &&
+  process.env.CLERK_SECRET_KEY.length > 10;
+
+if (isClerkConfigured) {
+  app.use('/api/*', clerkMiddleware());
+} else {
+  console.warn('[auth] Clerk not configured — API routes are unprotected');
+}
 app.route('/api', healthRoute);
 app.route('/api', todosRoute);
 app.route('/api', usersRoute);

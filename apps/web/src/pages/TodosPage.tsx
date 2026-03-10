@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useApi } from '@/shared/lib/use-api';
 import { Button } from '@/components/ui/button';
+import { ApiErrorBanner } from '@/shared/components/ApiErrorBanner';
 
 type Todo = {
   id: number;
@@ -9,19 +10,29 @@ type Todo = {
   createdAt: string | null;
 };
 
+type ApiError = { status: number | null; message?: string };
+
 export function TodosPage() {
   const api = useApi();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [title, setTitle] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
 
   const fetchTodos = useCallback(async () => {
-    // @ts-expect-error - useApi() client type lost under tsc -b; runtime shape is correct
-    const res = await api.api.todos.$get();
-    if (res.ok) {
-      const data = await res.json();
-      setTodos(data);
+    setError(null);
+    try {
+      // @ts-expect-error - useApi() client type lost under tsc -b; runtime shape is correct
+      const res = await api.api.todos.$get();
+      if (res.ok) {
+        const data = await res.json();
+        setTodos(data);
+      } else {
+        setError({ status: res.status });
+      }
+    } catch (e) {
+      setError({ status: null, message: e instanceof Error ? e.message : 'Failed to load todos' });
     }
     setLoading(false);
   }, [api]);
@@ -35,27 +46,40 @@ export function TodosPage() {
     const t = title.trim();
     if (!t || submitting) return;
     setSubmitting(true);
-    // @ts-expect-error - useApi() client type lost under tsc -b; runtime shape is correct
-    const res = await api.api.todos.$post({ json: { title: t } });
-    if (res.ok) {
-      const created = await res.json();
-      setTodos((prev) => [created, ...prev]);
-      setTitle('');
+    setError(null);
+    try {
+      // @ts-expect-error - useApi() client type lost under tsc -b; runtime shape is correct
+      const res = await api.api.todos.$post({ json: { title: t } });
+      if (res.ok) {
+        const created = await res.json();
+        setTodos((prev) => [created, ...prev]);
+        setTitle('');
+      } else {
+        setError({ status: res.status });
+      }
+    } catch (e) {
+      setError({ status: null, message: e instanceof Error ? e.message : 'Failed to add todo' });
     }
     setSubmitting(false);
   };
 
   const handleToggle = async (id: number, completed: boolean) => {
-    // @ts-expect-error - useApi() client type lost under tsc -b; runtime shape is correct
-    const res = await api.api.todos[':id'].$patch({
-      param: { id: String(id) },
-      json: { completed: !completed },
-    });
-    if (res.ok) {
-      const updated = await res.json();
-      setTodos((prev) =>
-        prev.map((todo) => (todo.id === id ? updated : todo))
-      );
+    try {
+      // @ts-expect-error - useApi() client type lost under tsc -b; runtime shape is correct
+      const res = await api.api.todos[':id'].$patch({
+        param: { id: String(id) },
+        json: { completed: !completed },
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setTodos((prev) =>
+          prev.map((todo) => (todo.id === id ? updated : todo))
+        );
+      } else {
+        setError({ status: res.status });
+      }
+    } catch {
+      setError({ status: null, message: 'Failed to update todo' });
     }
   };
 
@@ -74,6 +98,16 @@ export function TodosPage() {
       <p className="mt-1 text-zinc-400">
         Minimal todo app — database connected via Drizzle + Neon.
       </p>
+
+      {error && (
+        <div className="mt-4">
+          <ApiErrorBanner
+            status={error.status}
+            message={error.message}
+            onDismiss={() => setError(null)}
+          />
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-6 flex gap-2">
         <input

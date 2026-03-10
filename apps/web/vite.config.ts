@@ -14,6 +14,8 @@ export default defineConfig({
   },
   server: {
     port: 5167,
+    host: '127.0.0.1',
+    allowedHosts: ['launchkit.localhost'],
     proxy: {
       '/api': {
         target: 'http://localhost:3834',

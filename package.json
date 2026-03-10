@@ -8,13 +8,14 @@
   "scripts": {
     "dev": "concurrently \"npm:dev:web\" \"npm:dev:api\"",
     "dev:web": "npm run dev --workspace @launch-kit-spa-desktop-switchdimension/web",
-    "dev:api": "npm run dev --workspace @launch-kit-spa-desktop-switchdimension/api",
+    "dev:api": "env-cmd -f .env npm run dev --workspace @launch-kit-spa-desktop-switchdimension/api",
     "build": "npm run build --workspace @launch-kit-spa-desktop-switchdimension/web && npm run build --workspace @launch-kit-spa-desktop-switchdimension/api",
     "lint": "npm run lint --workspace @launch-kit-spa-desktop-switchdimension/web",
     "tauri": "npx @tauri-apps/cli dev",
     "tauri:build": "npx @tauri-apps/cli build"
   },
   "devDependencies": {
-    "concurrently": "^9.0.0"
+    "concurrently": "^9.0.0",
+    "env-cmd": "^11.0.0"
   }
 }

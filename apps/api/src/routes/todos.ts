@@ -18,16 +18,30 @@ export const todosRoute = new Hono()
     if (!auth?.userId) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
-    const body = await c.req.json<{ title: string }>();
+    let body: { title?: string };
+    try {
+      body = await c.req.json<{ title: string }>();
+    } catch {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
     const title = body?.title?.trim();
     if (!title) {
       return c.json({ error: 'title is required' }, 400);
     }
-    const [inserted] = await db
-      .insert(todos)
-      .values({ title })
-      .returning();
-    return c.json(inserted!, 201);
+    try {
+      const [inserted] = await db
+        .insert(todos)
+        .values({ title })
+        .returning();
+      return c.json(inserted!, 201);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('[POST /api/todos]', err);
+      return c.json(
+        { error: 'Failed to create todo', details: message },
+        500
+      );
+    }
   })
   .patch('/todos/:id', async (c) => {
     const auth = getAuth(c);

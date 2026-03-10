@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 import { resolve } from 'path';
 
-dotenv.config({ path: resolve(import.meta.dirname, '../../.env') });
+// Load from repo root (works when cwd is apps/api from npm run db:*)
+dotenv.config({ path: resolve(process.cwd(), '../../.env') });
 
 import { defineConfig } from 'drizzle-kit';
 

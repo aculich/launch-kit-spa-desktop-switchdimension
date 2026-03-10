@@ -1,0 +1,48 @@
+# Launch Kit SPA – Render Blueprint
+# See https://render.com/docs/blueprint-spec and README "Deploy to Render" section.
+# After deploy, set env vars in the Dashboard (Clerk keys, VITE_API_URL) and add your URLs to Clerk.
+
+databases:
+  - name: launchkit-db
+    databaseName: launchkit
+    plan: free
+
+services:
+  # Hono API (Node)
+  - type: web
+    runtime: node
+    name: launchkit-api
+    rootDir: apps/api
+    autoDeployTrigger: "off"
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    preDeployCommand: npm run db:migrate
+    envVars:
+      - key: PORT
+        value: 3834
+      - key: DATABASE_URL
+        fromDatabase:
+          name: launchkit-db
+          property: connectionString
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+
+  # Vite SPA (static)
+  - type: web
+    runtime: static
+    name: launchkit-web
+    autoDeployTrigger: "off"
+    buildCommand: npm install && npm run build --workspace=@launch-kit-spa-desktop-switchdimension/web
+    staticPublishPath: apps/web/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: VITE_API_URL
+        sync: false

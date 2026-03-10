@@ -45,6 +45,39 @@ node --version   # 18.0 or higher
 npm --version
 ```
 
+## Quick start (Mac with Homebrew)
+
+Shortest path to a running app on macOS with Homebrew:
+
+1. **Install dependencies**
+   ```bash
+   brew install node postgresql@17
+   brew services start postgresql@17
+   ```
+   Optional: [portless](https://github.com/portless/portless) for stable dev URLs (e.g. `http://launchkit.localhost:1355`). Install and start the portless proxy before `npm run dev` if you use it.
+
+2. **Clone, install, database**
+   ```bash
+   git clone https://github.com/aculich/launch-kit-spa-desktop-switchdimension.git my-app && cd my-app
+   npm install
+   createdb launchkit
+   ```
+   Copy env: `cp .env.example .env` (or use 1Password inject — see [Managing credentials with 1Password](#managing-credentials-with-1password)). Set `DATABASE_URL=postgresql://localhost:5432/launchkit` in `.env`, then:
+   ```bash
+   npm run db:push --workspace=@launch-kit-spa-desktop-switchdimension/api
+   ```
+
+3. **Clerk**  
+   Create an app at [clerk.com](https://clerk.com), copy Publishable and Secret keys into `.env` as `VITE_CLERK_PUBLISHABLE_KEY`, `CLERK_PUBLISHABLE_KEY`, and `CLERK_SECRET_KEY` (see [Set up Clerk](#3b-set-up-clerk-authentication)).
+
+4. **Run**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:5167](http://localhost:5167). If you use portless, start it first and open [http://launchkit.localhost:1355](http://launchkit.localhost:1355) instead.
+
+To stay in sync with the upstream template: `git remote add upstream https://github.com/switch-dimension/launch-kit-spa-desktop-switchdimension.git` (or the original repo URL), then `git fetch upstream && git rebase upstream/main` when you want to pull in updates.
+
 ## Getting Started
 
 ### 1. Clone the repository
@@ -70,11 +103,14 @@ cp .env.example .env
 
 You need a PostgreSQL database. Set one up **locally** or in the cloud with **[NeonDB](https://neon.tech)** or **[Supabase](https://supabase.com)**:
 
-- **Local Postgres:** Install PostgreSQL, create a database, and set `DATABASE_URL` in `.env`:
-  ```bash
-  # Example
-  DATABASE_URL=postgresql://user:password@localhost:5432/your_db
-  ```
+- **Local Postgres (one instance, one DB per project):** Use a single Postgres install and create one database per app (e.g. `launchkit` for this repo). [Portless](https://github.com/portless/portless) only proxies HTTP (Vite/API); the API connects to Postgres via `DATABASE_URL` on `localhost:5432`, so no portless config is needed for the DB.
+  - **macOS (Homebrew):** Start Postgres, create a DB, set `.env`:
+    ```bash
+    brew services start postgresql@17   # or postgresql@16, etc.
+    createdb launchkit                  # one DB per project
+    ```
+    In `.env`: `DATABASE_URL=postgresql://localhost:5432/launchkit` (no password needed for default local trust auth). Then run `npm run db:push --workspace=@launch-kit-spa-desktop-switchdimension/api`.
+  - **Other local setups:** Install PostgreSQL, create a database, and set `DATABASE_URL` in `.env` (e.g. `postgresql://user:password@localhost:5432/your_db`).
 - **NeonDB:** If you have the [Neon CLI](https://neon.tech/docs/reference/cli-install) installed, ask your AI agent to create a new database and save the connection string to `.env`. Or create a project at [neon.tech](https://neon.tech), copy the connection string from the dashboard, and paste it into `.env`.
 - **Supabase:** Create a project at [supabase.com](https://supabase.com), go to **Settings → Database**, copy the connection string (URI format), and paste it into `.env`.
 
@@ -88,6 +124,8 @@ npm run db:push --workspace=@launch-kit-spa-desktop-switchdimension/api
 ### 3b. Set up Clerk (authentication)
 
 The app uses [Clerk](https://clerk.com) for authentication. Without keys the app shows a "Clerk not configured" screen with setup instructions.
+
+**No CLI or API for creating applications.** Clerk does not provide a public CLI or REST API to create a new Clerk application or to obtain the publishable/secret key pair (`pk_test_` / `sk_test_`) programmatically. Creating an application and copying API keys is a one-time manual step in the [Clerk Dashboard](https://dashboard.clerk.com). The [Clerk CLI](https://github.com/clerk/cli) (early access) is for using an *existing* secret key to manage resources, not for creating applications.
 
 1. Create a free account at [clerk.com](https://clerk.com) and create an application. When prompted to choose a framework, select **React**.
 2. In the Clerk Dashboard, go to **API Keys**. The dashboard will show keys using Next.js naming conventions:
@@ -106,11 +144,22 @@ The app uses [Clerk](https://clerk.com) for authentication. Without keys the app
    The publishable key appears twice with different prefixes: `VITE_` is required for Vite to expose it to the browser, and the unprefixed `CLERK_PUBLISHABLE_KEY` is what the API middleware expects. Use the same `pk_test_...` value for both.
 3. The **Publishable Key** is all you need to get sign-in and sign-up working. The **Secret Key** is needed for the API to verify JWTs (protect `/api/todos`, `/api/users`, etc.).
 4. If you can't see the Secret Key, look for a **"Reveal"** or **"Show"** button next to it on the API Keys page. Only account **Admins** can reveal it.
-5. Ensure your Clerk application's allowed redirect URLs include `http://localhost:5167` (and your production URL when deploying).
+5. Ensure your Clerk application's allowed redirect URLs include your dev URLs. Add at least:
+   - `http://localhost:5167` (direct Vite port)
+   - If you use [portless](https://github.com/portless/portless): `http://launchkit.localhost:1355` (and optionally `https://launchkit.localhost:1355`). Add these in Clerk Dashboard → **Configure** → **Paths** (or **Settings** → **Domains** / redirect allowlist).
 
 > **Important:** When you first open the app, click **Sign up** to create an account before trying to sign in. There are no existing users until you register one.
 
 > **Note:** The `.env` file lives in the **project root** (same folder as `package.json`). Vite is configured to load env vars from there via `envDir` in `apps/web/vite.config.ts`. Do not put your `.env` inside `apps/web/`.
+
+### Managing credentials with 1Password
+
+If you use the 1Password CLI (`op`), keep one **1Password item per app** (e.g. "Launchkit Clerk") in a vault like **develop**, and reference secrets in a template file so you never commit real values.
+
+- **Template:** Keep `.env.template` with `op://` references (e.g. `op://develop/Launchkit Clerk/VITE_CLERK_PUBLISHABLE_KEY`). Do not commit `.env`.
+- **Inject:** Run `OP_ACCOUNT=my.1password.com op inject -i .env.template -o .env` to write resolved values into `.env`. Use the same account prefix for all `op` commands if your setup requires it.
+- **Best practice:** One item per app; use `op inject` and avoid workarounds. If `op` fails (e.g. not signed in), fix auth or the item — don’t paste secrets into the repo.
+- After inject, set any local-only vars in `.env` (e.g. `DATABASE_URL=postgresql://localhost:5432/launchkit`).
 
 ### 4. Run the app
 
@@ -118,10 +167,10 @@ The app uses [Clerk](https://clerk.com) for authentication. Without keys the app
 npm run dev
 ```
 
-- **Web app:** [http://localhost:5167](http://localhost:5167)
-- **API:** [http://localhost:3834](http://localhost:3834) (e.g. [http://localhost:3834/api/health](http://localhost:3834/api/health), [http://localhost:3834/api/users](http://localhost:3834/api/users))
+- **Web app:** [http://localhost:5167](http://localhost:5167) — or, if you use [portless](https://github.com/portless/portless), [http://launchkit.localhost:1355](http://launchkit.localhost:1355) (portless proxies to 5167).
+- **API:** [http://localhost:3834](http://localhost:3834) (e.g. [http://localhost:3834/api/health](http://localhost:3834/api/health)); with portless, [http://api.launchkit.localhost:1355](http://api.launchkit.localhost:1355) → 3834.
 
-Open the web app URL in your browser. The frontend proxies `/api` to the API in development, so you don’t need CORS.
+Open the web app URL in your browser. The frontend proxies `/api` to the API in development, so you don’t need CORS. After changing `.env` (e.g. adding Clerk keys), restart the dev server (Ctrl+C, then `npm run dev`) and hard-refresh the browser (Cmd+Shift+R / Ctrl+Shift+R) or use an incognito window.
 
 ### 5. (Optional) Run the desktop app
 
@@ -187,6 +236,44 @@ npm run build
 
 Deploy `apps/web/dist` to any static host or CDN, and run the API (e.g. `node dist/index.js` from `apps/api`, or your host’s Node runtime). Or run both in a single Railway (or similar) container.
 
+## One-click deploy (Render & Railway)
+
+You can deploy this repo to **Render** or **Railway** and then wire up Clerk (and optional custom domains). Use **one Clerk production instance** for both platforms: add all deployment URLs (Render, Railway, and any custom domains) to Clerk's allowed redirect/sign-in URLs. That is not problematic—Clerk supports multiple origins per application.
+
+### Deploy to Render
+
+The repo includes a [Render Blueprint](https://render.com/docs/blueprint-spec) (`render.yaml`) that defines a **Postgres database**, a **Node API** service, and a **static site** (Vite SPA).
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/aculich/launch-kit-spa-desktop-switchdimension)
+
+> **This fork:** The button above points at this repo. To deploy from the upstream template instead, use `repo=https://github.com/switch-dimension/launch-kit-spa-desktop-switchdimension` (or the current upstream URL) in the deploy link.
+
+1. Click the button, connect the repo, and create the Blueprint. Render will create `launchkit-db`, `launchkit-api`, and `launchkit-web`.
+2. In the **Dashboard**, set environment variables (they are marked *sync: false* in the Blueprint so you provide values once):
+   - **launchkit-api:** `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` (use your [Clerk production keys](https://clerk.com/docs/guides/development/deployment/production) — `pk_live_...` and `sk_live_...`).
+   - **launchkit-web:** `VITE_CLERK_PUBLISHABLE_KEY` (same `pk_live_...`), `VITE_API_URL` (your API URL, e.g. `https://launchkit-api.onrender.com`).
+3. In the [Clerk Dashboard](https://dashboard.clerk.com) (production instance), add your Render URLs to **Configure → Paths** (or **Domains** / redirect allowlist): e.g. `https://launchkit-web.onrender.com` and your API URL if needed for redirects.
+4. Redeploy the web service after setting `VITE_API_URL` so the frontend is built with the correct API base URL.
+
+### Deploy to Railway
+
+Railway uses **templates** for one-click deploy. Create a template from this project, then add the deploy button to your README.
+
+1. In [Railway](https://railway.com), create a new project from this repo (or your fork). Add a **Web Service** for the API (root dir `apps/api`, build `npm install && npm run build`, start `npm start`) and a **Static Site** (or second service) for the frontend (build from root, output `apps/web/dist`). Add a **Postgres** plugin and connect it to the API via `DATABASE_URL`. Configure Clerk env vars as above.
+2. In **Workspace → Templates**, use **Generate Template from Project** to create a template. Copy the template URL.
+3. Add the deploy button to your README (replace `YOUR_TEMPLATE_ID` with the ID from the template URL):
+
+   ```markdown
+   [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/YOUR_TEMPLATE_ID?utm_medium=integration&utm_source=button&utm_campaign=launchkit)
+   ```
+
+4. In the Clerk Dashboard (production instance), add your Railway URLs (e.g. `https://your-app.up.railway.app`) to the allowed redirect/sign-in list.
+
+### Clerk production and custom domains
+
+- **Same Clerk for Render and Railway:** Use one Clerk **production** instance; add every deployment origin (Render, Railway, and any custom domains) to Clerk's allowed URLs. See [Deploy your Clerk app to production](https://clerk.com/docs/guides/development/deployment/production).
+- **Custom domains (e.g. DNSimple):** For `flashmobcluster.com` / `flashmobcluster.org`, add CNAME (or A) records for your chosen subdomains (e.g. `launchkit.flashmobcluster.com` → Render/Railway). Then add `https://launchkit.flashmobcluster.com` (and API subdomain if used) to Clerk. DNSimple API credentials are in 1Password **develop** vault (`DNSIMPLE_API_ACCOUNT`, `DNSIMPLE_API_KEY`) for automation; if you have other services on the same domain, use distinct subdomains to avoid conflicts.
+
 ## Why This Stack
 
 | Piece | Choice | Why |
@@ -246,6 +333,8 @@ All three go in the root `.env` file. `VITE_CLERK_PUBLISHABLE_KEY` and `CLERK_PU
 
 - **No Publishable Key:** The app shows a full-page "Clerk not configured" screen with step-by-step setup instructions.
 - **No Secret Key:** The frontend works (sign-in, sign-up, navigation), but all API calls to protected routes return `401 Unauthorized`.
+
+**In-app errors:** Pages that call the API (e.g. Todos) show setup and API errors in the UI (not only in the console). If you see "Sign-in required" or "Request failed (401)", add the Clerk keys to `.env` and restart the API; for 500 errors, check `DATABASE_URL` and that the database is running. The app guides you through each step of the devops setup where human intervention is needed.
 
 ## Using the typed API client
 
