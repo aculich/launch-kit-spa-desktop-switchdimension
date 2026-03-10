@@ -1,0 +1,20 @@
+{
+  "name": "molten-os-0.2",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm:dev:web\" \"npm:dev:api\"",
+    "dev:web": "npm run dev --workspace @molten/web",
+    "dev:api": "npm run dev --workspace @molten/api",
+    "build": "npm run build --workspace @molten/web && npm run build --workspace @molten/api",
+    "lint": "npm run lint --workspace @molten/web",
+    "tauri": "npx @tauri-apps/cli dev",
+    "tauri:build": "npx @tauri-apps/cli build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
