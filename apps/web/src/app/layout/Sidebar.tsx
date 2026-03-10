@@ -1,6 +1,8 @@
+import { UserButton, Show } from '@clerk/react';
 import { Home, ListTodo, Settings } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 const navItems = [
   { to: '/', label: 'Home', icon: Home },
@@ -31,6 +33,34 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+      <div className="mt-auto border-t border-sidebar-border p-3">
+        <Show when="signed-out">
+          <div className="flex flex-col gap-2">
+            <Link to="/sign-in">
+              <Button variant="outline" size="sm" className="w-full">
+                Sign in
+              </Button>
+            </Link>
+            <Link to="/sign-up">
+              <Button size="sm" className="w-full">
+                Sign up
+              </Button>
+            </Link>
+          </div>
+        </Show>
+        <Show when="signed-in">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm text-sidebar-foreground/70">Account</span>
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: 'size-8',
+                },
+              }}
+            />
+          </div>
+        </Show>
+      </div>
     </aside>
   );
 }

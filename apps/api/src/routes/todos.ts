@@ -1,14 +1,23 @@
 import { Hono } from 'hono';
+import { getAuth } from '@hono/clerk-auth';
 import { desc, eq } from 'drizzle-orm';
 import { db } from '../lib/db/index.js';
 import { todos } from '../lib/db/schema.js';
 
 export const todosRoute = new Hono()
   .get('/todos', async (c) => {
+    const auth = getAuth(c);
+    if (!auth?.userId) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
     const result = await db.select().from(todos).orderBy(desc(todos.createdAt));
     return c.json(result);
   })
   .post('/todos', async (c) => {
+    const auth = getAuth(c);
+    if (!auth?.userId) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
     const body = await c.req.json<{ title: string }>();
     const title = body?.title?.trim();
     if (!title) {
@@ -21,6 +30,10 @@ export const todosRoute = new Hono()
     return c.json(inserted!, 201);
   })
   .patch('/todos/:id', async (c) => {
+    const auth = getAuth(c);
+    if (!auth?.userId) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
     const id = Number(c.req.param('id'));
     if (Number.isNaN(id)) {
       return c.json({ error: 'invalid id' }, 400);

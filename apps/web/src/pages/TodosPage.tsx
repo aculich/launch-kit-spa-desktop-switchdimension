@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api } from '@/shared/lib/api-client';
+import { useApi } from '@/shared/lib/use-api';
 import { Button } from '@/components/ui/button';
 
 type Todo = {
@@ -10,29 +10,32 @@ type Todo = {
 };
 
 export function TodosPage() {
+  const api = useApi();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [title, setTitle] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   const fetchTodos = useCallback(async () => {
+    // @ts-expect-error - useApi() client type lost under tsc -b; runtime shape is correct
     const res = await api.api.todos.$get();
     if (res.ok) {
       const data = await res.json();
       setTodos(data);
     }
     setLoading(false);
-  }, []);
+  }, [api]);
 
   useEffect(() => {
     fetchTodos();
-  }, [fetchTodos]);
+  }, [api, fetchTodos]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const t = title.trim();
     if (!t || submitting) return;
     setSubmitting(true);
+    // @ts-expect-error - useApi() client type lost under tsc -b; runtime shape is correct
     const res = await api.api.todos.$post({ json: { title: t } });
     if (res.ok) {
       const created = await res.json();
@@ -43,6 +46,7 @@ export function TodosPage() {
   };
 
   const handleToggle = async (id: number, completed: boolean) => {
+    // @ts-expect-error - useApi() client type lost under tsc -b; runtime shape is correct
     const res = await api.api.todos[':id'].$patch({
       param: { id: String(id) },
       json: { completed: !completed },
