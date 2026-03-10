@@ -1,4 +1,8 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import { resolve } from 'path';
+
+dotenv.config({ path: resolve(import.meta.dirname, '../../.env') });
+
 import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({

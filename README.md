@@ -62,14 +62,23 @@ npm install
 
 ### 3. Set up environment and database
 
-Copy the example env file and set your PostgreSQL connection string:
+Copy the example env file:
 
 ```bash
 cp .env.example .env
-# Edit .env and set DATABASE_URL=postgresql://user:password@localhost:5432/your_db
 ```
 
-From the API package, run migrations (or use `db:push` for prototyping):
+You need a PostgreSQL database. Set one up **locally** or in the cloud with **[NeonDB](https://neon.tech)** or **[Supabase](https://supabase.com)**:
+
+- **Local Postgres:** Install PostgreSQL, create a database, and set `DATABASE_URL` in `.env`:
+  ```bash
+  # Example
+  DATABASE_URL=postgresql://user:password@localhost:5432/your_db
+  ```
+- **NeonDB:** If you have the [Neon CLI](https://neon.tech/docs/reference/cli-install) installed, ask your AI agent to create a new database and save the connection string to `.env`. Or create a project at [neon.tech](https://neon.tech), copy the connection string from the dashboard, and paste it into `.env`.
+- **Supabase:** Create a project at [supabase.com](https://supabase.com), go to **Settings → Database**, copy the connection string (URI format), and paste it into `.env`.
+
+Once `DATABASE_URL` is set, run migrations from the API package (or use `db:push` for prototyping):
 
 ```bash
 npm run db:push --workspace=@launch-kit-spa-desktop-switchdimension/api
@@ -80,13 +89,15 @@ npm run db:push --workspace=@launch-kit-spa-desktop-switchdimension/api
 
 The app uses [Clerk](https://clerk.com) for authentication. Without keys the app shows a "Clerk not configured" screen with setup instructions.
 
-1. Create a free account at [clerk.com](https://clerk.com) and create an application.
+1. Create a free account at [clerk.com](https://clerk.com) and create an application. When prompted to choose a framework, select **React**.
 2. In the Clerk Dashboard, go to **API Keys** and copy:
    - **Publishable Key** (starts with `pk_test_`) → set `VITE_CLERK_PUBLISHABLE_KEY` in `.env`
    - **Secret Key** (starts with `sk_test_`) → set `CLERK_SECRET_KEY` in `.env`
 3. The **Publishable Key** is all you need to get sign-in and sign-up working. The **Secret Key** is needed for the API to verify JWTs (protect `/api/todos`, `/api/users`, etc.).
 4. If you can't see the Secret Key, look for a **"Reveal"** or **"Show"** button next to it on the API Keys page. Only account **Admins** can reveal it.
 5. Ensure your Clerk application's allowed redirect URLs include `http://localhost:5167` (and your production URL when deploying).
+
+> **Important:** When you first open the app, click **Sign up** to create an account before trying to sign in. There are no existing users until you register one.
 
 > **Note:** The `.env` file lives in the **project root** (same folder as `package.json`). Vite is configured to load env vars from there via `envDir` in `apps/web/vite.config.ts`. Do not put your `.env` inside `apps/web/`.
 
