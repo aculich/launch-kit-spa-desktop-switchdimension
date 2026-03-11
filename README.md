@@ -246,9 +246,9 @@ You can deploy this repo to **Render** or **Railway** and then wire up Clerk (an
 
 The repo includes a [Render Blueprint](https://render.com/docs/blueprint-spec) (`render.yaml`) that defines a **Postgres database**, a **Node API** service, and a **static site** (Vite SPA).
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/aculich/launch-kit-spa-desktop-switchdimension)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/aculich/launch-kit-spa-desktop-switchdimension/tree/main)
 
-> **This fork:** The button above points at this repo. To deploy from the upstream template instead, use `repo=https://github.com/switch-dimension/launch-kit-spa-desktop-switchdimension` (or the current upstream URL) in the deploy link.
+> **This fork:** The button above points at this repo and explicitly uses the `main` branch. To deploy from the upstream template instead, use `repo=https://github.com/switch-dimension/launch-kit-spa-desktop-switchdimension/tree/main` in the deploy link.
 
 1. Click the button, connect the repo, and create the Blueprint. Render will create `launchkit-db`, `launchkit-api`, and `launchkit-web`.
 2. In the **Dashboard**, set environment variables (they are marked *sync: false* in the Blueprint so you provide values once):
