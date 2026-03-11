@@ -50,5 +50,7 @@ services:
     envVars:
       - key: VITE_CLERK_PUBLISHABLE_KEY
         sync: false
+      # VITE_API_URL: set in Dashboard after first deploy (e.g. https://launchkit-api.onrender.com).
+      # Render Blueprint fromService only exposes private-network host/port, not the public URL, so this cannot be auto-filled.
       - key: VITE_API_URL
         sync: false
