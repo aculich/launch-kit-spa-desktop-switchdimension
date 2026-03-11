@@ -218,10 +218,12 @@ Tauri starts the web app and opens a native window. Build a production desktop b
 │       ├── drizzle/        # Generated migrations
 │       └── drizzle.config.ts
 ├── src-tauri/               # Tauri desktop app (optional)
+├── .agents/skills/          # Agent skills (canonical path per [Cursor](https://cursor.com/docs/skills) / [Agent Skills](https://agentskills.io))
 ├── package.json             # Workspaces + root scripts
 └── tsconfig.base.json
 ```
 
+- **`.agents/skills/`** — Project-level agent skills (each subdir has `SKILL.md`). Use this path only; `.agent/skills/` (singular) is non-standard.
 - **`app/`** — Shell: layout, sidebar, and routing. Change once, everything updates.
 - **`features/`** — Domain or product features; each can own components, hooks, and state.
 - **`shared/`** — Reusable UI and utilities; no imports from `features` or `pages`.

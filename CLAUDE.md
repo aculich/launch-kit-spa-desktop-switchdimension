@@ -23,9 +23,12 @@ Full-stack SPA starter kit: React 19 frontend + Hono API backend + optional Taur
 │       │   └── middleware/ # Custom middleware (placeholder)
 │       └── drizzle/       # SQL migration files
 ├── src-tauri/             # Tauri v2 desktop shell (optional)
+├── .agents/skills/        # Agent skills (canonical path; each subdir has SKILL.md)
 ├── .env.example           # Template for environment variables
 └── tsconfig.base.json     # Shared TypeScript config
 ```
+
+**Agent skills:** The canonical path for project-level skills is **`.agents/skills/`** (plural). Cursor discovers skills from `.agents/skills/` and `.cursor/skills/` ([Cursor docs](https://cursor.com/docs/skills)); the [Agent Skills](https://agentskills.io) convention is `.agents/skills/` for cross-client interoperability. Do not use `.agent/skills/` (singular); that path is non-standard and redundant.
 
 ## Tech Stack
 
