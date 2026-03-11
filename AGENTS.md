@@ -27,5 +27,6 @@ When the conversation involves **API keys or credential access** (e.g. `API_KEY`
 - Local Postgres: one instance, one database per project (e.g. `createdb launchkit`); set `DATABASE_URL=postgresql://localhost:5432/<dbname>` at repo root.
 - Clerk keys and optional 1Password item "Launchkit Clerk" in develop vault; `.env.template` uses `op://` references for inject.
 - DNSimple API creds for this workspace are in 1Password develop (`DNSIMPLE_API_ACCOUNT`, `DNSIMPLE_API_KEY`); custom domains use `flashmobcluster.com` or `flashmobcluster.org` with distinct subdomains to avoid clashing with other services.
+- Git: origin is the user's fork (e.g. aculich/launch-kit-spa-desktop-switchdimension); upstream is the template repo (switch-dimension/...). Push to origin; sync with template by rebasing from upstream when needed.
 
 **Preferred local setup:** Mac with Homebrew: `brew` for Node and PostgreSQL, one DB per project (`createdb launchkit`), portless for dev URLs, then `npm run dev`. README has a "Quick start (Mac with Homebrew)" section and "Managing credentials with 1Password"; follow those for a turnkey path. Render and Railway one-click deploy are documented in the README; use the same Clerk production instance for all deployment origins.

@@ -250,7 +250,7 @@ The repo includes a [Render Blueprint](https://render.com/docs/blueprint-spec) (
 
 > **This fork:** The button above points at this repo and explicitly uses the `main` branch. To deploy from the upstream template instead, use `repo=https://github.com/switch-dimension/launch-kit-spa-desktop-switchdimension/tree/main` in the deploy link.
 
-1. Click the button, connect the repo, and create the Blueprint. Render will create `launchkit-db`, `launchkit-api`, and `launchkit-web`.
+1. Click the button and connect the repo. On the Blueprint form, set **Blueprint Name** to `Launchkit Template` (or any name) and **Blueprint Path** to `render.yaml` if those fields are not already filled. Then create the Blueprint. Render will create `launchkit-db`, `launchkit-api`, and `launchkit-web`.
 2. In the **Dashboard**, set environment variables (they are marked *sync: false* in the Blueprint so you provide values once):
    - **launchkit-api:** `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` (use your [Clerk production keys](https://clerk.com/docs/guides/development/deployment/production) — `pk_live_...` and `sk_live_...`).
    - **launchkit-web:** `VITE_CLERK_PUBLISHABLE_KEY` (same `pk_live_...`), `VITE_API_URL` (your API URL, e.g. `https://launchkit-api.onrender.com`).
