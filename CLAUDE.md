@@ -156,6 +156,7 @@ Follow shadcn/ui patterns — place in `apps/web/src/components/ui/` with CVA va
 ## Gotchas
 
 - `.env` must be at monorepo root, not inside individual apps
+- For Render Blueprint (`render.yaml`) edits and deploy flows, the [Render Cursor plugin](https://github.com/renderinc/render-cursor-plugin) (Cursor Marketplace) is recommended
 - `VITE_CLERK_PUBLISHABLE_KEY` and `CLERK_PUBLISHABLE_KEY` are the same value but both must be set
 - The Vite dev proxy handles `/api` routing — in production, configure your reverse proxy or hosting accordingly
 - Tailwind CSS v4 uses `@import "tailwindcss"` syntax, not the v3 `@tailwind` directives

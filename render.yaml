@@ -18,6 +18,9 @@ services:
     startCommand: npm start
     healthCheckPath: /api/health
     preDeployCommand: npm run db:migrate
+    buildFilter:
+      paths:
+        - apps/api/**
     envVars:
       - key: PORT
         value: 3834
@@ -37,6 +40,9 @@ services:
     autoDeployTrigger: "off"
     buildCommand: npm install && npm run build --workspace=@launch-kit-spa-desktop-switchdimension/web
     staticPublishPath: apps/web/dist
+    buildFilter:
+      paths:
+        - apps/web/**
     routes:
       - type: rewrite
         source: /*

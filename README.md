@@ -244,18 +244,21 @@ You can deploy this repo to **Render** or **Railway** and then wire up Clerk (an
 
 ### Deploy to Render
 
-The repo includes a [Render Blueprint](https://render.com/docs/blueprint-spec) (`render.yaml`) that defines a **Postgres database**, a **Node API** service, and a **static site** (Vite SPA).
+The repo includes a [Render Blueprint](https://render.com/docs/blueprint-spec) (`render.yaml`) that defines a **Postgres database**, a **Node API** service, and a **static site** (Vite SPA). For editing the Blueprint and deploy flows in Cursor, the [Render Cursor plugin](https://github.com/renderinc/render-cursor-plugin) (Cursor Marketplace) is recommended.
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/aculich/launch-kit-spa-desktop-switchdimension/tree/main)
 
 > **This fork:** The button above points at this repo and explicitly uses the `main` branch. To deploy from the upstream template instead, use `repo=https://github.com/switch-dimension/launch-kit-spa-desktop-switchdimension/tree/main` in the deploy link.
 
-1. Click the button and connect the repo. On the Blueprint form, set **Blueprint Name** to `Launchkit Template` (or any name) and **Blueprint Path** to `render.yaml` if those fields are not already filled. Then create the Blueprint. Render will create `launchkit-db`, `launchkit-api`, and `launchkit-web`.
+1. Click the button and connect the repo. On the Blueprint form, set **Blueprint Name** to `Launchkit Template` (or any name). Set **Blueprint Path** to `render.yaml`—Render defaults to this path at the repo root; if the field is empty or shows a placeholder, type `render.yaml`. Then create the Blueprint. Render will create `launchkit-db`, `launchkit-api`, and `launchkit-web`.
+   - **If you see "A Blueprint file was found, but there was an issue":** Confirm **Blueprint Path** is exactly `render.yaml` and that the connected repo/branch contains `render.yaml` at the root. Fix the path if needed and try again, or use **Manual Sync** after correcting.
 2. In the **Dashboard**, set environment variables (they are marked *sync: false* in the Blueprint so you provide values once):
    - **launchkit-api:** `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` (use your [Clerk production keys](https://clerk.com/docs/guides/development/deployment/production) — `pk_live_...` and `sk_live_...`).
    - **launchkit-web:** `VITE_CLERK_PUBLISHABLE_KEY` (same `pk_live_...`), `VITE_API_URL` (your API URL, e.g. `https://launchkit-api.onrender.com`).
 3. In the [Clerk Dashboard](https://dashboard.clerk.com) (production instance), add your Render URLs to **Configure → Paths** (or **Domains** / redirect allowlist): e.g. `https://launchkit-web.onrender.com` and your API URL if needed for redirects.
 4. Redeploy the web service after setting `VITE_API_URL` so the frontend is built with the correct API base URL.
+
+**Verify:** In the Render Dashboard you should see `launchkit-db`, `launchkit-api`, and `launchkit-web`. Open the web service URL (e.g. `https://launchkit-web.onrender.com`) and the API health URL (e.g. `https://launchkit-api.onrender.com/api/health`) to confirm the app and API are reachable; then sign in to confirm Clerk redirects.
 
 ### Deploy to Railway
 
